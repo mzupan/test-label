@@ -105,6 +105,32 @@ jobs:
           mkdir output
           echo '${{ steps.prev-version.outputs.result }}' > output/previous-version.txt
           echo '${{ steps.new-version.outputs.result }}' > output/new-version.txt
+      - name: Extract changelog entry
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: prInfo } = await github.rest.pulls.get({
+              owner, repo,
+              pull_number: context.issue.number,
+            });
+            console.log('Found PR body:|');
+            console.log(prInfo.body);
+            const changelogEntry = ((prInfo.body
+              .split(/^#+ ?/m)
+              .find(x => x.startsWith('Changelog'))
+              || '').split(/^```/m)[1] || '').trim();
+            if (!changelogEntry)
+              throw `'Changelog' section not found in PR body! Please add it back.`;
+            if (changelogEntry.match(/^TODO:/m))
+              throw `'Changelog' section needs proper text, instead of 'TODO'`;
+            const { writeFile } = require('fs').promises;
+            await writeFile('output/changelog.md', `
+            * PR [#${ prInfo.number }](${ prInfo.html_url }) - ${ prInfo.title }
+            \`\`\`
+            ${changelogEntry}
+            \`\`\`
+            `.trimLeft(), { encoding: 'utf-8' })
       - name: Upload result artifacts
         uses: actions/upload-artifact@v2
         with:
