@@ -77,3 +77,23 @@ jobs:
             console.log('Found previous version', prevVer);
             return prevVer;
           result-encoding: string
+
+      - name: Determine new version number
+        uses: actions/github-script@v4
+        id: new-version
+        env:
+          PREV_VERSION: '${{ steps.prev-version.outputs.result }}'
+          RELEASE_TYPE: '${{ needs.detect.outputs.release-type }}'
+        with:
+          script: |
+            const { PREV_VERSION, RELEASE_TYPE } = process.env;
+            console.log('Previous version was', PREV_VERSION);
+            console.log('Release type is', RELEASE_TYPE);
+            const numbers = PREV_VERSION.split('.');
+            const numberIdx = ['major', 'minor', 'patch'].indexOf(RELEASE_TYPE);
+            numbers[numberIdx] = parseInt(numbers[numberIdx]) + 1;
+            for (let i = numberIdx + 1; i < numbers.length; i++) {
+              numbers[i] = 0;
+            }
+            return numbers.join('.');
+          result-encoding: string
