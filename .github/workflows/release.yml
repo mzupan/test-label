@@ -77,8 +77,6 @@ jobs:
       - name: Detect previous version number
         uses: actions/github-script@v4
         id: prev-version
-        env:
-          PACKAGE_NAME: '${{ matrix.directory }}'
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -90,7 +88,7 @@ jobs:
               }
             }`;
             const result = await github.graphql(query, { owner, repo,
-              refPrefix: `refs/tags/rel/${process.env.PACKAGE_NAME}/`,
+              refPrefix: `refs/tags/`,
             });
             const prevNode = result.repository.refs.edges[0];
             const prevVer = prevNode ? prevNode.node.name : '0.0.0';
