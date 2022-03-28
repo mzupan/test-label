@@ -105,7 +105,13 @@ jobs:
           mkdir output
           echo '${{ steps.prev-version.outputs.result }}' > output/previous-version.txt
           echo '${{ steps.new-version.outputs.result }}' > output/new-version.txt
-  
+      - name: Upload result artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: '${{ matrix.directory }}'
+          path: output
+          retention-days: 5
+
   comment:
     needs: [detect, plan]
     if: needs.detect.outputs.is-merge-event == 'false'
