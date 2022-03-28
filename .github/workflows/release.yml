@@ -46,3 +46,20 @@ jobs:
         id: raw-files
         with:
           format: 'json'
+      - name: Condense to directory list
+        uses: actions/github-script@v4
+        id: condense
+        env:
+          RAW_FILES: '${{ steps.raw-files.outputs.all }}'
+        with:
+          script: |
+            const raw = JSON.parse(process.env.RAW_FILES);
+            const directories = Array.from(new Set(raw
+              .filter(x => !x.startsWith('.'))
+              .filter(x => x.includes('/'))
+              .map(x => x.split('/')[0])
+            ));
+            if (directories.length < 1) return {};
+            return {
+              include: directories.map(directory => ({ directory })),
+            };
