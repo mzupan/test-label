@@ -164,7 +164,6 @@ jobs:
               if (!folder.isDirectory()) continue;
               const readText = (name) => readFile(name, utf8).then(x => x.trim());
               lines.push('| '+[
-                `\`${folder.name}\``,
                 `${await readText(`outputs/${folder.name}/previous-version.txt`)}`,
                 `**${await readText(`outputs/${folder.name}/new-version.txt`)}**`,
               ].join(' | ')+' |');
