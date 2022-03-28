@@ -156,8 +156,8 @@ jobs:
             const utf8 = { encoding: 'utf-8' };
             const lines = [
               '# Release plan', '',
-              '| Directory | Previous version | New version |',
-              '|--|--|--|',
+              '| Previous version | New version |',
+              '|--|--|',
             ];
             const sections = [];
             for (const folder of await readdir('outputs', { withFileTypes: true })) {
