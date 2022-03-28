@@ -1,0 +1,10 @@
+name: Module Versioning
+concurrency: 
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+  pull_request_target:
+    types: [closed]
