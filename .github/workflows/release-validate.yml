@@ -109,6 +109,7 @@ jobs:
           result-encoding: string
       - name: Extract changelog entry
         uses: actions/github-script@v5
+        id: get-changelog
         with:
           script: |
             mkdir output
