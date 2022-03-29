@@ -152,15 +152,13 @@ jobs:
               '|--|--|',
             ];
             const sections = [];
-            for (const folder of await readdir('outputs', { withFileTypes: true })) {
-              if (!folder.isDirectory()) continue;
-              const readText = (name) => readFile(name, utf8).then(x => x.trim());
-              lines.push('| '+[
-                `${PREV_VERSION}`,
-                `**${NEW_VERSION}**`,
-              ].join(' | ')+' |');
-              sections.push(`<details><summary>Changelog preview </summary>\n\n${CHANGELOG}\n</details>`);
-            }
+
+            lines.push('| '+[
+              `${PREV_VERSION}`,
+              `**${NEW_VERSION}**`,
+            ].join(' | ')+' |');
+            sections.push(`<details><summary>Changelog preview </summary>\n\n${CHANGELOG}\n</details>`);
+
             const finalBody = [lines.join('\n'), ...sections].join('\n\n');
             const {data: allComments} = await github.issues.listComments({ issue_number, owner, repo });
             const ourComments = allComments
