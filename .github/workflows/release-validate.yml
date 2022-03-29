@@ -39,18 +39,6 @@ jobs:
             echo "::error ::No release type labels found(patch/minor/major/no-release)"
             exit 2
           fi
-
-  pr_body_check:
-    runs-on: ubuntu-latest
-    name: 'Check PR Body Contents'
-    outputs:
-      directories: ${{ steps.condense.outputs.result }}
-      release-type: ${{ steps.check_pr_label.outputs.release-type}}
-      is-merge-event: >-
-        ${{ github.event_name == 'pull_request_target'
-         && github.event.action == 'closed'
-         && github.event.pull_request.merged == true }}
-    steps:
       - name: Check for text in the Body
         uses: actions/github-script@v5
         with:
