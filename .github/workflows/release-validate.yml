@@ -4,6 +4,8 @@ concurrency:
   cancel-in-progress: true
 
 on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   pull_request_target:
     types: [closed]
 
@@ -21,6 +23,24 @@ jobs:
     steps:
         # I'm getting the labels from the API and not the context("contains(github.event.pull_request.labels.*.name, 'Env Promote')") as the labels
         # are added in 2nd API call so they aren't included in the PR context
+      - name: Check PR labels
+        id: check_pr_label
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}} #TODO: check if needed (we don't checkout the code..)
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+        run: |
+          LABELS=$(gh pr view $PR_URL --json labels  --jq '.labels[]| select((.name=="minor") or (.name=="major") or (.name=="patch") or (.name=="no-release")) |.name')
+          NUMBER_OF_LABELS=$(echo "$LABELS" |wc -w)
+          if [ "$NUMBER_OF_LABELS" -eq "1" ] ; then
+            echo "Found: $LABELS"
+            echo "::set-output name=release-type::$LABELS"
+          elif [ "$NUMBER_OF_LABELS" -gt "1" ] ; then
+            echo "::error ::Too many release type labels: $( echo $LABELS | tr '\n' ' ' )"
+            exit 1
+          else
+            echo "::error ::No release type labels found(patch/minor/major/no-release)"
+            exit 2
+          fi
       - name: Get changed files
         uses: Ana06/get-changed-files@v1.2
         id: raw-files
