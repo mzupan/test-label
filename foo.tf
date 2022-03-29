@@ -1,3 +1,3 @@
 foobar_resource "foobar" {
-  name = "major"
+  name = "major2"
 }
