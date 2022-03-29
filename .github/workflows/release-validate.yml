@@ -64,7 +64,7 @@ jobs:
       - semver_check
       - pr_body_check
     runs-on: ubuntu-latest
-    name: 'Release Module'
+    name: 'Prepare/Announce Release'
     if: needs.semver_check.outputs.is-merge-event == 'true'
     outputs:
       new-version: ${{ steps.new-version.outputs.result }}
