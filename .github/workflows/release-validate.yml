@@ -60,6 +60,7 @@ jobs:
               throw `'Changelog' uses the PR body text. So add some.`;
 
   release:
+    needs: semver_check
     runs-on: ubuntu-latest
     name: 'Release Module'
     steps:
