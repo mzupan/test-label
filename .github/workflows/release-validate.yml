@@ -1,4 +1,4 @@
-name: Module Versioning
+name: Module Versioning Validation
 concurrency: 
   group: ${{ github.head_ref }}
   cancel-in-progress: true
