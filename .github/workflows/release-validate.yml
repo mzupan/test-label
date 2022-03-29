@@ -171,11 +171,6 @@ jobs:
           NEW_VERSION: '${{ steps.new-version.outputs.result }}'
         with:
           script: |
-            const { NEW_VERSION } = process.env
+            const { NEW_VERSION } = process.env;
             const { owner, repo } = context.repo;
-
-            #const ref = `refs/tags/${NEW_VERSION}`;
-              
-            #console.log('Tagging', NEW_VERSION, 'as', context.sha);
-            #await github.git.createRef({ owner, repo, ref, context.sha });
 
