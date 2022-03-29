@@ -52,3 +52,29 @@ jobs:
             const changelogEntry = prInfo.body
             if (!changelogEntry)
               throw `'Changelog' uses the PR body text. So add some.`;
+
+  release:
+    runs-on: ubuntu-latest
+    name: 'Release Module'
+    steps:
+      - name: Detect previous version number
+        uses: actions/github-script@v4
+        id: prev-version
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const query = `query($owner: String!, $repo: String!, $refPrefix: String!) {
+              repository(owner: $owner, name: $repo) {
+                refs(refPrefix: $refPrefix, first: 1, orderBy: {field: TAG_COMMIT_DATE, direction: DESC}) {
+                  edges { node { name } }
+                }
+              }
+            }`;
+            const result = await github.graphql(query, { owner, repo,
+              refPrefix: `refs/tags/`,
+            });
+            const prevNode = result.repository.refs.edges[0];
+            const prevVer = prevNode ? prevNode.node.name : '0.0.0';
+            console.log('Found previous version', prevVer);
+            return prevVer;
+          result-encoding: string
