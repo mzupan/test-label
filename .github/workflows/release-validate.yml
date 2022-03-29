@@ -32,26 +32,7 @@ jobs:
             echo "::error ::No release type labels found(patch/minor/major/no-release)"
             exit 2
           fi
-      - name: Check for text in the Body
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const { data: prInfo } = await github.rest.pulls.get({
-              owner, repo,
-              pull_number: context.issue.number,
-            });
-            console.log('Found PR body:|');
-            console.log(prInfo.body);
-            const changelogEntry = prInfo.body
-            if (!changelogEntry)
-              throw `'Changelog' section not found in PR body! Please add it back.`;
-            
-      - name: Get changed files
-        uses: Ana06/get-changed-files@v1.2
-        id: raw-files
-        with:
-          format: 'json'
+
 
   pr_body_check:
     runs-on: ubuntu-latest
