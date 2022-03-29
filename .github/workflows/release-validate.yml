@@ -51,7 +51,7 @@ jobs:
             console.log(prInfo.body);
             const changelogEntry = prInfo.body
             if (!changelogEntry)
-              throw `'Changelog' section not found in PR body! Please add it back.`;
+              throw `'Changelog' uses the PR body text. So add some.`;
             
       - name: Get changed files
         uses: Ana06/get-changed-files@v1.2
