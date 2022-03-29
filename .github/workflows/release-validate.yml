@@ -147,7 +147,7 @@ jobs:
             const { readdir, readFile } = require('fs').promises;
             const utf8 = { encoding: 'utf-8' };
             const lines = [
-              '# Release plan', '',
+              '# Module Release', '',
               '| Previous version | New version |',
               '|--|--|',
             ];
