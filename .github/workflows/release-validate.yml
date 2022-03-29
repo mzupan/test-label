@@ -155,7 +155,7 @@ jobs:
             const sections = [];
 
             lines.push('| '+ PREV_VERSION +' | '+ NEW_VERSION +' |')
-            sections.push('<details><summary>Changelog preview </summary>\n\n'+ CHANGELOG +'\n</details>');
+            sections.push(`<details><summary>Changelog preview </summary>\n\n`+ CHANGELOG +`\n</details>`);
 
             const finalBody = [lines.join('\n'), ...sections].join('\n\n');
             const {data: allComments} = await github.issues.listComments({ issue_number, owner, repo });
