@@ -157,7 +157,7 @@ jobs:
               const readText = (name) => readFile(name, utf8).then(x => x.trim());
               lines.push('| '+[
                 `${PREV_VERSION}`,
-                `**${NEW_VERSION)}**`,
+                `**${NEW_VERSION}**`,
               ].join(' | ')+' |');
               sections.push(`<details><summary>Changelog preview </summary>\n\n${CHANGELOG}\n</details>`);
             }
