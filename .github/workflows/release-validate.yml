@@ -174,8 +174,8 @@ jobs:
             const { NEW_VERSION } = process.env
             const { owner, repo } = context.repo;
 
-            const ref = `refs/tags/${NEW_VERSION}`;
+            #const ref = `refs/tags/${NEW_VERSION}`;
               
-            console.log('Tagging', NEW_VERSION, 'as', context.sha);
-            await github.git.createRef({ owner, repo, ref, context.sha });
+            #console.log('Tagging', NEW_VERSION, 'as', context.sha);
+            #await github.git.createRef({ owner, repo, ref, context.sha });
 
