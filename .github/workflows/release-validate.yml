@@ -110,6 +110,7 @@ jobs:
         uses: actions/github-script@v5
         with:
           script: |
+            mkdir output
             const { owner, repo } = context.repo;
             const { data: prInfo } = await github.rest.pulls.get({
               owner, repo,
