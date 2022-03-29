@@ -127,12 +127,13 @@ jobs:
               throw `'Changelog' is the pull request body. Please add one`;
            
             const { writeFile } = require('fs').promises;
-            await writeFile('output/changelog.md', `
+            
+            return  `
             * PR [#${ prInfo.number }](${ prInfo.html_url }) - ${ prInfo.title }
             \`\`\`
             ${changelogEntry}
             \`\`\`
-            `.trimLeft(), { encoding: 'utf-8' })
+            `
       - name: Comment on PR
         uses: actions/github-script@v2
         with:
