@@ -10,9 +10,9 @@ on:
     types: [closed]
 
 jobs:
-  validate:
+  semver_check:
     runs-on: ubuntu-latest
-    name: 'Detect pull request context'
+    name: 'Check SemVer Label'
     outputs:
       directories: ${{ steps.condense.outputs.result }}
       release-type: ${{ steps.check_pr_label.outputs.release-type}}
@@ -39,6 +39,31 @@ jobs:
             echo "::error ::No release type labels found(patch/minor/major/no-release)"
             exit 2
           fi
+      - name: Check for text in the Body
+        uses: actions/github-script@v5
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: prInfo } = await github.rest.pulls.get({
+              owner, repo,
+              pull_number: context.issue.number,
+            });
+            console.log('Found PR body:|');
+            console.log(prInfo.body);
+            const changelogEntry = prInfo.body
+            if (!changelogEntry)
+              throw `'Changelog' section not found in PR body! Please add it back.`;
+  pr_body_check:
+    runs-on: ubuntu-latest
+    name: 'Check PR Body Contents'
+    outputs:
+      directories: ${{ steps.condense.outputs.result }}
+      release-type: ${{ steps.check_pr_label.outputs.release-type}}
+      is-merge-event: >-
+        ${{ github.event_name == 'pull_request_target'
+         && github.event.action == 'closed'
+         && github.event.pull_request.merged == true }}
+    steps:
       - name: Check for text in the Body
         uses: actions/github-script@v5
         with:
