@@ -164,13 +164,6 @@ jobs:
             const finalBody = [lines.join('\n'), ...sections].join('\n\n');            
             const {data: newComment} = await github.issues.createComment({ issue_number, owner, repo, body: finalBody });
             console.log('Posted comment', newComment.id, '@', newComment.html_url);
-  tag:
-    needs: 
-      - release
-    runs-on: ubuntu-latest
-    name: 'Tag Releases'
-    if: needs.semver_check.outputs.is-merge-event == 'true'
-    steps:
       - uses: actions/github-script@v2
         env:
           NEW_VERSION: '${{ needs.release.outputs.new-version }}'
@@ -182,32 +175,6 @@ jobs:
             const sha = context.sha;
             
             await github.git.createRef({ owner, repo, ref, sha });
-      - name: Make output dir
-        run: |
-          mkdir output
-      - name: Extract changelog entry
-        uses: actions/github-script@v5
-        with:
-          script: |
-            const { owner, repo } = context.repo;
-            const { data: prInfo } = await github.rest.pulls.get({
-              owner, repo,
-              pull_number: context.issue.number,
-            });
-            console.log('Found PR body:|');
-            console.log(prInfo.body);
-            const changelogEntry = prInfo.body
-            if (!changelogEntry)
-              throw `'Changelog' is the pull request body. Please add one`;
-           
-            const { writeFile } = require('fs').promises;
-            
-            await writeFile('output/changelog.md', `
-            * PR [#${ prInfo.number }](${ prInfo.html_url }) - ${ prInfo.title }
-            \`\`\`
-            ${changelogEntry}
-            \`\`\`
-            `.trimLeft(), { encoding: 'utf-8' })
       - name: 'Create Release'
         uses: actions/create-release@v1
         env:
