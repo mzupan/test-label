@@ -107,19 +107,32 @@ jobs:
             console.log('New Version will be', numbers.join('.'));
             return numbers.join('.');
           result-encoding: string
+      - name: Make output dir
+        run: |
+          mkdir output
       - name: Extract changelog entry
         uses: actions/github-script@v5
         id: get-changelog
         with:
           script: |
-            mkdir output
-            const { owner, repo } = context.repo;
+            onst { owner, repo } = context.repo;
             const { data: prInfo } = await github.rest.pulls.get({
               owner, repo,
               pull_number: context.issue.number,
             });
             console.log('Found PR body:|');
             console.log(prInfo.body);
+            const changelogEntry = prInfo.body
+            if (!changelogEntry)
+              throw `'Changelog' section not found in PR body! Please add it back.`;
+           
+            const { writeFile } = require('fs').promises;
+            await writeFile('output/changelog.md', `
+            * PR [#${ prInfo.number }](${ prInfo.html_url }) - ${ prInfo.title }
+            \`\`\`
+            ${changelogEntry}
+            \`\`\`
+            `.trimLeft(), { encoding: 'utf-8' })
 
 
 
