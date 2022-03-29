@@ -161,6 +161,8 @@ jobs:
             const {data: newComment} = await github.issues.createComment({ issue_number, owner, repo, body: finalBody });
             console.log('Posted comment', newComment.id, '@', newComment.html_url);
   tag:
+    needs: 
+      - release
     runs-on: ubuntu-latest
     name: 'Tag Releases'
     steps:
