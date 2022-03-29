@@ -14,7 +14,6 @@ jobs:
     runs-on: ubuntu-latest
     name: 'Check SemVer Label'
     outputs:
-      directories: ${{ steps.condense.outputs.result }}
       release-type: ${{ steps.check_pr_label.outputs.release-type}}
       is-merge-event: >-
         ${{ github.event_name == 'pull_request_target'
@@ -40,16 +39,10 @@ jobs:
             exit 2
           fi
 
+
   pr_body_check:
     runs-on: ubuntu-latest
-    name: 'Check PR Body Contents'
-    outputs:
-      directories: ${{ steps.condense.outputs.result }}
-      release-type: ${{ steps.check_pr_label.outputs.release-type}}
-      is-merge-event: >-
-        ${{ github.event_name == 'pull_request_target'
-         && github.event.action == 'closed'
-         && github.event.pull_request.merged == true }}
+    name: 'Check PR Body for Text'
     steps:
       - name: Check for text in the Body
         uses: actions/github-script@v5
@@ -64,10 +57,127 @@ jobs:
             console.log(prInfo.body);
             const changelogEntry = prInfo.body
             if (!changelogEntry)
-              throw `'Changelog' section not found in PR body! Please add it back.`;
-            
-      - name: Get changed files
-        uses: Ana06/get-changed-files@v1.2
-        id: raw-files
+              throw `'Changelog' uses the PR body text. So add some.`;
+
+  release:
+    needs: 
+      - semver_check
+      - pr_body_check
+    runs-on: ubuntu-latest
+    name: 'Release Module'
+    outputs:
+      new-version: ${{ steps.new-version.outputs.result }}
+    steps:
+      - name: Detect previous version number
+        uses: actions/github-script@v4
+        id: prev-version
         with:
-          format: 'json'
+          script: |
+            const { owner, repo } = context.repo;
+            const query = `query($owner: String!, $repo: String!, $refPrefix: String!) {
+              repository(owner: $owner, name: $repo) {
+                refs(refPrefix: $refPrefix, first: 1, orderBy: {field: TAG_COMMIT_DATE, direction: DESC}) {
+                  edges { node { name } }
+                }
+              }
+            }`;
+            const result = await github.graphql(query, { owner, repo,
+              refPrefix: `refs/tags/`,
+            });
+            const prevNode = result.repository.refs.edges[0];
+            const prevVer = prevNode ? prevNode.node.name : '0.0.0';
+            console.log('Found previous version', prevVer);
+            return prevVer;
+          result-encoding: string
+      - name: Determine new version number
+        uses: actions/github-script@v4
+        id: new-version
+        env:
+          PREV_VERSION: '${{ steps.prev-version.outputs.result }}'
+          RELEASE_TYPE: '${{ needs.semver_check.outputs.release-type }}'
+        with:
+          script: |
+            const { PREV_VERSION, RELEASE_TYPE } = process.env;
+            console.log('Previous version was', PREV_VERSION);
+            console.log('Release type is', RELEASE_TYPE);
+            const numbers = PREV_VERSION.split('.');
+            const numberIdx = ['major', 'minor', 'patch'].indexOf(RELEASE_TYPE);
+            numbers[numberIdx] = parseInt(numbers[numberIdx]) + 1;
+            for (let i = numberIdx + 1; i < numbers.length; i++) {
+              numbers[i] = 0;
+            }
+            
+            console.log('New Version will be', numbers.join('.'));
+            return numbers.join('.');
+          result-encoding: string
+      - name: Make output dir
+        run: |
+          mkdir output
+      - name: Extract changelog entry
+        uses: actions/github-script@v5
+        id: get-changelog
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const { data: prInfo } = await github.rest.pulls.get({
+              owner, repo,
+              pull_number: context.issue.number,
+            });
+            console.log('Found PR body:|');
+            console.log(prInfo.body);
+            const changelogEntry = prInfo.body
+            if (!changelogEntry)
+              throw `'Changelog' is the pull request body. Please add one`;
+           
+            const { writeFile } = require('fs').promises;
+            
+            await writeFile('output/changelog.md', `
+            * PR [#${ prInfo.number }](${ prInfo.html_url }) - ${ prInfo.title }
+            \`\`\`
+            ${changelogEntry}
+            \`\`\`
+            `.trimLeft(), { encoding: 'utf-8' })
+      - name: Comment on PR
+        uses: actions/github-script@v2
+        env:
+          PREV_VERSION: '${{ steps.prev-version.outputs.result }}'
+          NEW_VERSION: '${{ steps.new-version.outputs.result }}'
+        with:
+          script: |
+            const { PREV_VERSION, NEW_VERSION } = process.env
+            const { owner, repo } = context.repo;
+            const { number: issue_number } = context.issue;
+            const { readdir, readFile } = require('fs').promises;
+            const utf8 = { encoding: 'utf-8' };
+            const lines = [
+              '# Module Release', '',
+              '| Previous version | New version |',
+              '|--|--|',
+            ];
+            const sections = [];
+
+            const readText = (name) => readFile(name, utf8).then(x => x.trim());
+            lines.push('| '+ PREV_VERSION +' | '+ NEW_VERSION +' |')
+            sections.push(`<details><summary>Changelog preview </summary>\n\n${await readText(`output/changelog.md`)}\n</details>`);
+
+            const finalBody = [lines.join('\n'), ...sections].join('\n\n');            
+            const {data: newComment} = await github.issues.createComment({ issue_number, owner, repo, body: finalBody });
+            console.log('Posted comment', newComment.id, '@', newComment.html_url);
+  tag:
+    needs: 
+      - release
+    runs-on: ubuntu-latest
+    name: 'Tag Releases'
+    steps:
+      - uses: actions/github-script@v2
+        env:
+          NEW_VERSION: '${{ needs.release.outputs.new-version }}'
+        with:
+          script: |
+            const { NEW_VERSION } = process.env;
+            const { owner, repo } = context.repo;
+            const ref = `refs/tags/${NEW_VERSION}`;
+            const sha = context.sha;
+            
+            await github.git.createRef({ owner, repo, ref, sha });
+            
