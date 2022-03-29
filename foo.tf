@@ -1,3 +1,3 @@
 foobar_resource "foobar" {
-  name = "foobar"
+  name = "foobar2"
 }
