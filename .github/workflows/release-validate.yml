@@ -52,9 +52,3 @@ jobs:
             const changelogEntry = prInfo.body
             if (!changelogEntry)
               throw `'Changelog' uses the PR body text. So add some.`;
-            
-      - name: Get changed files
-        uses: Ana06/get-changed-files@v1.2
-        id: raw-files
-        with:
-          format: 'json'
