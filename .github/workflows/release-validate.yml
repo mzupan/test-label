@@ -190,4 +190,5 @@ jobs:
           draft: false
           prerelease: false
           release_name: ${{ needs.release.outputs.new-version }}
-          tag_name: ${{ needs.release.outputs.new-version }}
+          tag_name: ${{ needs.release.outputs.new-version }} 
+          body: ${await readText(`output/changelog.md`)}
