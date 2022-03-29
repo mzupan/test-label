@@ -155,7 +155,7 @@ jobs:
 
             const readText = (name) => readFile(name, utf8).then(x => x.trim());
             lines.push('| '+ PREV_VERSION +' | '+ NEW_VERSION +' |')
-            sections.push(`<details><summary>Changelog preview </summary>\n\n${await readText(`outputs/changelog.md`)}\n</details>`);
+            sections.push(`<details><summary>Changelog preview </summary>\n\n${await readText(`output/changelog.md`)}\n</details>`);
 
             const finalBody = [lines.join('\n'), ...sections].join('\n\n');            
             const {data: newComment} = await github.issues.createComment({ issue_number, owner, repo, body: finalBody });
