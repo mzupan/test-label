@@ -155,25 +155,4 @@ jobs:
 
             lines.push('| '+ PREV_VERSION +' | '+ NEW_VERSION +' |')
 
-            #sections.push(`<details><summary>Changelog preview </summary>\n\n${{ steps.get-changelog.outputs.result }}\n</details>`);
-
-            const finalBody = [lines.join('\n'), ...sections].join('\n\n');
-            const {data: allComments} = await github.issues.listComments({ issue_number, owner, repo });
-            const ourComments = allComments
-              .filter(comment => comment.user.login === 'github-actions[bot]')
-              .filter(comment => comment.body.startsWith(lines[0]+'\n'));
-            const latestComment = ourComments.slice(-1)[0];
-            if (latestComment && latestComment.body === finalBody) {
-              console.log('Existing comment is already up to date.');
-              return;
-            }
-            const {data: newComment} = await github.issues.createComment({ issue_number, owner, repo, body: finalBody });
-            console.log('Posted comment', newComment.id, '@', newComment.html_url);
-            // Delete all our previous comments
-            for (const comment of ourComments) {
-              if (comment.id === newComment.id) continue;
-              console.log('Deleting previous PR comment from', comment.created_at);
-              await github.issues.deleteComment({ comment_id: comment.id, owner, repo });
-            }
-
-
+         
