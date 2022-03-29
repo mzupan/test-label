@@ -65,6 +65,8 @@ jobs:
       - pr_body_check
     runs-on: ubuntu-latest
     name: 'Release Module'
+    outputs:
+      new-version: ${{ steps.new-version.outputs.result }}
     steps:
       - name: Detect previous version number
         uses: actions/github-script@v4
@@ -104,6 +106,7 @@ jobs:
             for (let i = numberIdx + 1; i < numbers.length; i++) {
               numbers[i] = 0;
             }
+            
             console.log('New Version will be', numbers.join('.'));
             return numbers.join('.');
           result-encoding: string
@@ -168,7 +171,7 @@ jobs:
     steps:
       - uses: actions/github-script@v2
         env:
-          NEW_VERSION: '${{ steps.new-version.outputs.result }}'
+          NEW_VERSION: '${{ needs.release.outputs.new-version }}'
         with:
           script: |
             const { NEW_VERSION } = process.env;
