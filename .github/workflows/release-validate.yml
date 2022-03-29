@@ -65,7 +65,7 @@ jobs:
       - pr_body_check
     runs-on: ubuntu-latest
     name: 'Prepare/Announce Release'
-    if: needs.semver_check.outputs.is-merge-event == 'true'
+    if: needs.semver_check.outputs.is-merge-event == 'true' && ${{ needs.semver_check.outputs.release-type != 'no-release' }}
     steps:
       - name: Detect previous version number
         uses: actions/github-script@v4
