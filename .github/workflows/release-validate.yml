@@ -83,7 +83,7 @@ jobs:
         id: new-version
         env:
           PREV_VERSION: '${{ steps.prev-version.outputs.result }}'
-          RELEASE_TYPE: '${{ needs.detect.outputs.release-type }}'
+          RELEASE_TYPE: '${{ needs.semver_check.outputs.release-type }}'
         with:
           script: |
             const { PREV_VERSION, RELEASE_TYPE } = process.env;
