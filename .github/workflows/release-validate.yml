@@ -66,8 +66,6 @@ jobs:
     runs-on: ubuntu-latest
     name: 'Prepare/Announce Release'
     if: needs.semver_check.outputs.is-merge-event == 'true'
-    outputs:
-      new-version: ${{ steps.new-version.outputs.result }}
     steps:
       - name: Detect previous version number
         uses: actions/github-script@v4
@@ -166,7 +164,7 @@ jobs:
             console.log('Posted comment', newComment.id, '@', newComment.html_url);
       - uses: actions/github-script@v2
         env:
-          NEW_VERSION: '${{ needs.release.outputs.new-version }}'
+          NEW_VERSION: '${{ steps.new-version.outputs.result }}'
         with:
           script: |
             const { NEW_VERSION } = process.env;
@@ -182,6 +180,6 @@ jobs:
         with:
           draft: false
           prerelease: false
-          release_name: ${{ needs.release.outputs.new-version }}
-          tag_name: ${{ needs.release.outputs.new-version }} 
+          release_name: ${{ steps.new-version.outputs.result }}
+          tag_name: ${{ steps.new-version.outputs.result }}
           body_path: output/changelog.md
