@@ -115,7 +115,7 @@ jobs:
         id: get-changelog
         with:
           script: |
-            onst { owner, repo } = context.repo;
+            const { owner, repo } = context.repo;
             const { data: prInfo } = await github.rest.pulls.get({
               owner, repo,
               pull_number: context.issue.number,
@@ -124,7 +124,7 @@ jobs:
             console.log(prInfo.body);
             const changelogEntry = prInfo.body
             if (!changelogEntry)
-              throw `'Changelog' section not found in PR body! Please add it back.`;
+              throw `'Changelog' is the pull request body. Please add one`;
            
             const { writeFile } = require('fs').promises;
             await writeFile('output/changelog.md', `
