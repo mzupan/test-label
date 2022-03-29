@@ -173,4 +173,5 @@ jobs:
           script: |
             const { NEW_VERSION } = process.env;
             const { owner, repo } = context.repo;
-
+            const ref = `refs/tags/${NEW_VERSION}`;
+            
