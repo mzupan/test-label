@@ -104,6 +104,7 @@ jobs:
             for (let i = numberIdx + 1; i < numbers.length; i++) {
               numbers[i] = 0;
             }
+            console.log('New Version will be', numbers.join('.'));
             return numbers.join('.');
           result-encoding: string
       - name: Extract changelog entry
