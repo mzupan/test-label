@@ -160,5 +160,20 @@ jobs:
             const finalBody = [lines.join('\n'), ...sections].join('\n\n');            
             const {data: newComment} = await github.issues.createComment({ issue_number, owner, repo, body: finalBody });
             console.log('Posted comment', newComment.id, '@', newComment.html_url);
+  tag:
+    runs-on: ubuntu-latest
+    name: 'Tag Releases'
+    steps:
+      - uses: actions/github-script@v2
+        env:
+          NEW_VERSION: '${{ steps.new-version.outputs.result }}'
+        with:
+          script: |
+            const { NEW_VERSION } = process.env
+            const { owner, repo } = context.repo;
 
-         
+            const ref = `refs/tags/${NEW_VERSION}`;
+              
+            console.log('Tagging', NEW_VERSION, 'as', context.sha);
+            await github.git.createRef({ owner, repo, ref, context.sha });
+
