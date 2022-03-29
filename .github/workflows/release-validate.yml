@@ -65,6 +65,7 @@ jobs:
       - pr_body_check
     runs-on: ubuntu-latest
     name: 'Release Module'
+    if: needs.semver_check.outputs.is-merge-event == 'true'
     outputs:
       new-version: ${{ steps.new-version.outputs.result }}
     steps:
@@ -168,6 +169,7 @@ jobs:
       - release
     runs-on: ubuntu-latest
     name: 'Tag Releases'
+    if: needs.semver_check.outputs.is-merge-event == 'true'
     steps:
       - uses: actions/github-script@v2
         env:
